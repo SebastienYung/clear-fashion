@@ -92,19 +92,21 @@ console.log(sorted_product_by_date)
 // 1. Filter the list of products between 50€ and 100€
 var filter_50_100 = []
 marketplace.forEach(obj => (obj.price>50 && obj.price<100) ? filter_50_100.push(obj) : null)
-
-//var filter_50_100 = marketplace.forEach(obj=> filter_50_100.push(obj.brand))
-
 // 2. Log the list
 console.log(filter_50_100)
 
 // 🎯 TODO: Average Basket
 // 1. Determine the average basket of the marketplace
+var baskets = []
+marketplace.forEach(obj => (obj.name.includes('basket')?baskets.push(obj):null))
+
+var count = 0, sumPrice = 0;
+for (var key in baskets) {
+  sumPrice += baskets[key].price;
+  count += 1;
+}
 // 2. Log the average
-
-
-
-
+console.log(sumPrice/count);
 
 /**
  * 🏎
