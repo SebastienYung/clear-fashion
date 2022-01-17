@@ -68,20 +68,35 @@ console.log(brand_names.length)
 
 // 🎯 TODO: Sort by price
 // 1. Create a function to sort the marketplace products by price
+function sort_by_price(marketplace){
+  return marketplace.sort((a, b) => (a.price > b.price) ? 1 : -1)
+}
 // 2. Create a variable and assign it the list of products by price from lowest to highest
+var sorted_product_by_price = marketplace
+sorted_product_by_price = sort_by_price(marketplace)
 // 3. Log the variable
-
+console.log(sorted_product_by_price)
 
 // 🎯 TODO: Sort by date
 // 1. Create a function to sort the marketplace objects by products date
+function sort_by_date(marketplace){
+  return marketplace.sort((a, b) => (a.date > b.date) ? 1 : -1)
+}
 // 2. Create a variable and assign it the list of products by date from recent to old
+var sorted_product_by_date = marketplace
+sorted_product_by_date = sort_by_date(marketplace)
 // 3. Log the variable
-
+console.log(sorted_product_by_date)
 
 // 🎯 TODO: Filter a specific price range
 // 1. Filter the list of products between 50€ and 100€
-// 2. Log the list
+var filter_50_100 = []
+marketplace.forEach(obj => (obj.price>50 && obj.price<100) ? filter_50_100.push(obj) : null)
 
+//var filter_50_100 = marketplace.forEach(obj=> filter_50_100.push(obj.brand))
+
+// 2. Log the list
+console.log(filter_50_100)
 
 // 🎯 TODO: Average Basket
 // 1. Determine the average basket of the marketplace
