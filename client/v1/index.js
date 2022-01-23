@@ -95,8 +95,9 @@ marketplace.forEach(obj => (obj.price>50 && obj.price<100) ? filter_50_100.push(
 // 2. Log the list
 console.log(filter_50_100)
 
-// 🎯 TODO: Average Basket
-// 1. Determine the average basket of the marketplace
+
+// 🎯 TODO: Average price
+// 1. Determine the average price of the marketplace
 var baskets = []
 marketplace.forEach(obj => (obj.name.includes('basket')?baskets.push(obj):null))
 
@@ -105,6 +106,7 @@ for (var key in baskets) {
   sumPrice += baskets[key].price;
   count += 1;
 }
+
 // 2. Log the average
 console.log(sumPrice/count);
 
