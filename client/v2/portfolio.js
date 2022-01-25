@@ -8,6 +8,7 @@ let currentPagination = {};
 // inititiqte selectors
 const selectShow = document.querySelector('#show-select');
 const selectPage = document.querySelector('#page-select');
+const selectBrand = document.querySelector('#brand-select');
 const sectionProducts = document.querySelector('#products');
 const spanNbProducts = document.querySelector('#nbProducts');
 
@@ -27,6 +28,7 @@ const setCurrentProducts = ({result, meta}) => {
  * @param  {Number}  [size=12] - size of the page
  * @return {Object}
  */
+
 const fetchProducts = async (page = 1, size = 12) => {
   try {
     const response = await fetch(
@@ -39,12 +41,15 @@ const fetchProducts = async (page = 1, size = 12) => {
       return {currentProducts, currentPagination};
     }
 
+    //console.log(body.data)
+
     return body.data;
   } catch (error) {
     console.error(error);
     return {currentProducts, currentPagination};
   }
-};
+};  
+
 
 /**
  * Render list of products
@@ -110,11 +115,32 @@ const render = (products, pagination) => {
  * Select the number of products to display
  * @type {[type]}
  */
+
+
+
 selectShow.addEventListener('change', event => {
-  fetchProducts(currentPagination.currentPage, parseInt(event.target.value))
+  currentPagination.pageSize = parseInt(event.target.value);
+  fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination));
 });
+
+selectPage.addEventListener('change', event => {
+  currentPagination.currentPage = parseInt(event.target.value);
+  fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+  .then(setCurrentProducts)
+  .then(() => render(currentProducts, currentPagination));
+});
+
+selectPage.addEventListener('change', event => {
+  currentPagination.currentPage = parseInt(event.target.value);
+  fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+  .then(setCurrentProducts)
+  .then(() => render(currentProducts, currentPagination));
+});
+
+var data = fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(function(j) { (j) });
+console.log(data)
 
 document.addEventListener('DOMContentLoaded', () =>
   fetchProducts()
