@@ -22,6 +22,10 @@ const setCurrentProducts = ({result, meta}) => {
   currentPagination = meta;
 };
 
+const getUniqueBrands = ({result, meta}) => {
+  console.log([... new Set(result.map(obj => obj.brand))]);
+};
+
 /**
  * Fetch products from api
  * @param  {Number}  [page=1] - current page to fetch
@@ -139,10 +143,9 @@ selectPage.addEventListener('change', event => {
   .then(() => render(currentProducts, currentPagination));
 });
 
-fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(function(j) { 
-  console.log(j.result.map(obj => obj.brand))
-  console.log([... new Set(j.result.map(obj => obj.brand))]); 
-});
+
+
+fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(getUniqueBrands);
 
 
 document.addEventListener('DOMContentLoaded', () =>
