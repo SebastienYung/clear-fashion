@@ -139,8 +139,11 @@ selectPage.addEventListener('change', event => {
   .then(() => render(currentProducts, currentPagination));
 });
 
-var data = fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(function(j) { (j) });
-console.log(data)
+fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(function(j) { 
+  console.log(j.result.map(obj => obj.brand))
+  console.log([... new Set(j.result.map(obj => obj.brand))]); 
+});
+
 
 document.addEventListener('DOMContentLoaded', () =>
   fetchProducts()
