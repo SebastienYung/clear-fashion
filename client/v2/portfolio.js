@@ -22,10 +22,6 @@ const setCurrentProducts = ({result, meta}) => {
   currentPagination = meta;
 };
 
-const getUniqueBrands = ({result, meta}) => {
-  console.log([... new Set(result.map(obj => obj.brand))]);
-};
-
 /**
  * Fetch products from api
  * @param  {Number}  [page=1] - current page to fetch
@@ -61,11 +57,11 @@ const fetchProducts = async (page = 1, size = 12) => {
  */
 const renderProducts = products => {
   const fragment = document.createDocumentFragment();
-  const div = document.createElement('div');
+  const div = document.createElement('div'); // <div></div>
   const template = products
     .map(product => {
       return `
-      <div class="product" id=${product.uuid}>
+      <div class="product" id="${product.uuid}">
         <span>${product.brand}</span>
         <a href="${product.link}">${product.name}</a>
         <span>${product.price}</span>
@@ -80,11 +76,30 @@ const renderProducts = products => {
   sectionProducts.appendChild(fragment);
 };
 
+// 1. Render option
+// renderBrands()
+// map -> brands
+// <option value="${brand.uuid}">${brand.name}</option>
+// selectBrand.appendChild ^
+
+// 2. document.querySelector('#my-button').addEventListener('click')
+
 /**
  * Render page selector
  * @param  {Object} pagination
  */
 const renderPagination = pagination => {
+  const {currentPage, pageCount} = pagination;
+  const options = Array.from(
+    {'length': pageCount},
+    (value, index) => `<option value="${index + 1}">${index + 1}</option>`
+  ).join('');
+
+  selectPage.innerHTML = options;
+  selectPage.selectedIndex = currentPage - 1;
+};
+
+const renderBrand = pagination => {
   const {currentPage, pageCount} = pagination;
   const options = Array.from(
     {'length': pageCount},
@@ -130,23 +145,48 @@ selectShow.addEventListener('change', event => {
 });
 
 selectPage.addEventListener('change', event => {
+  console.log({event})
   currentPagination.currentPage = parseInt(event.target.value);
   fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
   .then(setCurrentProducts)
   .then(() => render(currentProducts, currentPagination));
 });
 
-selectPage.addEventListener('change', event => {
+/*selectPage.addEventListener('change', event => {
   currentPagination.currentPage = parseInt(event.target.value);
   fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
   .then(setCurrentProducts)
   .then(() => render(currentProducts, currentPagination));
-});
+});*/
 
 
+const populate = async(brandSelector) => {
+  var brandSelector = await document.getElementById(brandSelector);
 
-fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(getUniqueBrands);
+  brandSelector.innerHTML = "";
 
+  //brands = fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(getUniqueBrands);
+  var uniqueBrand = await getUniqueBrands()
+  var newOption = document.createElement("option")
+    newOption.value = "All"
+    newOption.innerHTML = "All"
+    brandSelector.options.add(newOption)
+  for(var brand in uniqueBrand){
+    var newOption = document.createElement("option")
+    newOption.value = uniqueBrand[brand]
+    newOption.innerHTML = uniqueBrand[brand]
+    brandSelector.options.add(newOption)
+    console.log(getUniqueBrands)
+  }
+}
+
+const getUniqueBrands = async () => {
+  var data = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+  //console.log([... new Set(data.result.map(obj => obj.brand))])
+  return await [... new Set(data.result.map(obj => obj.brand))];
+};
+
+fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(getUniqueBrands)
 
 document.addEventListener('DOMContentLoaded', () =>
   fetchProducts()

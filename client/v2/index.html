@@ -9,7 +9,7 @@
     <section id="options">
       <div id="show">
         <label for="show-select">Show:</label>
-        <select name="show" id="show-select">
+        <select name="show" id="show-select" onchange="populate('brand-select')">
           <option value="12">12</option>
           <option value="24">24</option>
           <option value="48">48</option>
@@ -17,16 +17,14 @@
       </div>
       <div id="page">
         <label for="page-select">Go to page:</label>
-        <select name="page" id="page-select"> </select>
+        <select name="page" id="page-select" onchange="populate('brand-select')"> </select>
       </div>
       <div id="filters">
         <span>By reasonable price</span>
         <span>By recently released</span>
         <div id="brand">
           <label for="brand-select">By brands:</label>
-          <select name="brand" id="brand-select"> 
-            <option value="brand-filter">Brand</option>
-          </select>
+          <select name="brand" id="brand-select"></select>
         </div>
       </div>
       <div id="sort">
