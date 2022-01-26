@@ -29,6 +29,34 @@ const setCurrentProducts = ({result, meta}) => {
  * @return {Object}
  */
 
+ function groupArrayOfObjects(list, key) {
+  return list.reduce(function(rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};
+
+const fetchProductsbyBrand = async (brand ,page = 1, size = 12) => {
+  try {
+    const response = await fetch(
+      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
+    );
+    const body = await response.json();
+
+    if (body.success !== true) {
+      console.error(body);
+      return {currentProducts, currentPagination};
+    }
+
+    //console.log(body.data)
+    body.data.result = groupArrayOfObjects(body.data.result, 'brand')[brand]
+    return body.data;
+  } catch (error) {
+    console.error(error);
+    return {currentProducts, currentPagination};
+  }
+};  
+
 const fetchProducts = async (page = 1, size = 12) => {
   try {
     const response = await fetch(
@@ -42,7 +70,6 @@ const fetchProducts = async (page = 1, size = 12) => {
     }
 
     //console.log(body.data)
-
     return body.data;
   } catch (error) {
     console.error(error);
@@ -142,6 +169,9 @@ selectShow.addEventListener('change', event => {
   fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination));
+
+    populateBrandSelector()
+
 });
 
 selectPage.addEventListener('change', event => {
@@ -150,32 +180,40 @@ selectPage.addEventListener('change', event => {
   fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
   .then(setCurrentProducts)
   .then(() => render(currentProducts, currentPagination));
+
+  populateBrandSelector()
+
 });
 
-/*selectPage.addEventListener('change', event => {
-  currentPagination.currentPage = parseInt(event.target.value);
-  fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-  .then(setCurrentProducts)
-  .then(() => render(currentProducts, currentPagination));
-});*/
+selectBrand.addEventListener('change', event => {
+  if(event.target.value === 'All'){
+    fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
+  }
+  else{
+    fetchProductsbyBrand(event.target.value, currentPagination.currentPage, currentPagination.pageSize)
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
+  }
+  
+});
 
 
-const populate = async(brandSelector) => {
-  var brandSelector = await document.getElementById(brandSelector);
-
-  brandSelector.innerHTML = "";
+const populateBrandSelector = async() => {
+  selectBrand.innerHTML = "";
 
   //brands = fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(getUniqueBrands);
   var uniqueBrand = await getUniqueBrands()
   var newOption = document.createElement("option")
     newOption.value = "All"
     newOption.innerHTML = "All"
-    brandSelector.options.add(newOption)
+    selectBrand.options.add(newOption)
   for(var brand in uniqueBrand){
     var newOption = document.createElement("option")
     newOption.value = uniqueBrand[brand]
     newOption.innerHTML = uniqueBrand[brand]
-    brandSelector.options.add(newOption)
+    selectBrand.options.add(newOption)
     console.log(getUniqueBrands)
   }
 }
@@ -193,3 +231,6 @@ document.addEventListener('DOMContentLoaded', () =>
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination))
 );
+
+populateBrandSelector()
+
