@@ -87,6 +87,37 @@ const fetchRecentProducts = async (page = 1, size = 12) => {
 
     //console.log(body.data)
     body.data.result = getRecentProduct(body.data.result)
+    return body.data;
+  } catch (error) {
+    console.error(error);
+    return {currentProducts, currentPagination};
+  }
+}; 
+
+const getReasonableProduct = (products) => {
+  var reasonableProduct = [];
+  for(var i in products){
+    if(products[i]['price'] <= 50){
+      reasonableProduct.push(products[i]);
+    }
+  }
+  return reasonableProduct
+}
+
+const fetchReasonableProducts = async (page = 1, size = 12) => {
+  try {
+    const response = await fetch(
+      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
+    );
+    const body = await response.json();
+
+    if (body.success !== true) {
+      console.error(body);
+      return {currentProducts, currentPagination};
+    }
+
+    //console.log(body.data)
+    body.data.result = getReasonableProduct(body.data.result)
     console.log(body.data.result)
     return body.data;
   } catch (error) {
@@ -107,7 +138,6 @@ const fetchProducts = async (page = 1, size = 12) => {
       return {currentProducts, currentPagination};
     }
 
-    console.log(body.data)
     return body.data;
   } catch (error) {
     console.error(error);
@@ -237,6 +267,7 @@ selectBrand.addEventListener('change', event => {
   
 });
 
+// Améliorable en donnant la possibilité d'afficher les articles récents et raisonnable
 var onlyRecent = false;
 recentProduct.addEventListener('click', event => {
   onlyRecent = !onlyRecent
@@ -252,6 +283,26 @@ recentProduct.addEventListener('click', event => {
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination));
     recentProduct.setAttribute("style", "color:black;")
+  }
+
+});
+
+// Améliorable en donnant la possibilité d'afficher les articles récents et raisonnable
+var onlyReasonable = false
+reasonablePrice.addEventListener('click', event => {
+  onlyReasonable = !onlyReasonable
+  if(onlyReasonable === true){
+    fetchReasonableProducts(currentPagination.currentPage, currentPagination.pageSize)
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
+
+    reasonablePrice.setAttribute("style", "color:#33FF36;")
+  }
+  else{
+    fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
+    reasonablePrice.setAttribute("style", "color:black;")
   }
 
 });
