@@ -11,6 +11,7 @@ const selectPage = document.querySelector('#page-select');
 const selectBrand = document.querySelector('#brand-select');
 const recentProduct = document.querySelector('#recent-product');
 const reasonablePrice = document.querySelector('#reasonable-price')
+const selectSort = document.querySelector('#sort-select')
 const sectionProducts = document.querySelector('#products');
 const spanNbProducts = document.querySelector('#nbProducts');
 
@@ -118,7 +119,6 @@ const fetchReasonableProducts = async (page = 1, size = 12) => {
 
     //console.log(body.data)
     body.data.result = getReasonableProduct(body.data.result)
-    console.log(body.data.result)
     return body.data;
   } catch (error) {
     console.error(error);
@@ -243,7 +243,6 @@ selectShow.addEventListener('change', event => {
 });
 
 selectPage.addEventListener('change', event => {
-  console.log({event})
   currentPagination.currentPage = parseInt(event.target.value);
   fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
   .then(setCurrentProducts)
@@ -307,6 +306,47 @@ reasonablePrice.addEventListener('click', event => {
 
 });
 
+selectSort.addEventListener('change', event => {
+  console.log(event.target.value)
+  switch(event.target.value){
+    case 'price-asc':
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      .then((data) => { data.result.sort((a, b) => (a.price > b.price) ? 1 : -1);
+                        return data;})
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+      break;
+    case 'price-desc':
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      .then((data) => { data.result.sort((a, b) => (a.price > b.price) ? -1 : 1);
+                        return data;})
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+      break;
+    case 'date-desc':
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      .then((data) => { data.result.sort((a, b) => (a.released > b.released) ? 1 : -1);
+                        console.log(data.result)
+                        return data;})
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+      break;
+    case 'date-asc':
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      .then((data) => { data.result.sort((a, b) => (a.released > b.released) ? -1 : 1);
+                        console.log(data.result)
+                        return data;})
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+      break;
+    default:
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+      break;
+  }
+});
+
 
 const populateBrandSelector = async() => {
   selectBrand.innerHTML = "";
@@ -322,7 +362,6 @@ const populateBrandSelector = async() => {
     newOption.value = uniqueBrand[brand]
     newOption.innerHTML = uniqueBrand[brand]
     selectBrand.options.add(newOption)
-    console.log(getUniqueBrands)
   }
 }
 
