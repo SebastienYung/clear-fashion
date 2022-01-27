@@ -33,98 +33,40 @@ const setCurrentProducts = ({result, meta}) => {
  */
 
  function groupArrayOfObjects(list, key) {
-  return list.reduce(function(rv, x) {
+  return (list.result).reduce(function(rv, x) {
     (rv[x[key]] = rv[x[key]] || []).push(x);
     return rv;
   }, {});
 };
-
-const fetchProductsByBrand = async (brand ,page = 1, size = 12) => {
-  try {
-    const response = await fetch(
-      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
-    );
-    const body = await response.json();
-
-    if (body.success !== true) {
-      console.error(body);
-      return {currentProducts, currentPagination};
-    }
-
-    //console.log(body.data)
-    body.data.result = groupArrayOfObjects(body.data.result, 'brand')[brand]
-    return body.data;
-  } catch (error) {
-    console.error(error);
-    return {currentProducts, currentPagination};
-  }
-};  
 
 const getRecentProduct = (products) => {
   var recentProduct = [];
   var twoWeeksAgo = new Date();
   twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
 
-  for(var i in products){
-    if(new Date(products[i]['released']) >= twoWeeksAgo){
-      recentProduct.push(products[i]);
+  for(var i in products.result){
+    if(new Date(products.result[i]['released']) >= twoWeeksAgo){
+      recentProduct.push(products.result[i]);
     }
   }
+  
+  products.result = recentProduct
 
-  return recentProduct
+  return products
 }
-
-const fetchRecentProducts = async (page = 1, size = 12) => {
-  try {
-    const response = await fetch(
-      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
-    );
-    const body = await response.json();
-
-    if (body.success !== true) {
-      console.error(body);
-      return {currentProducts, currentPagination};
-    }
-
-    //console.log(body.data)
-    body.data.result = getRecentProduct(body.data.result)
-    return body.data;
-  } catch (error) {
-    console.error(error);
-    return {currentProducts, currentPagination};
-  }
-}; 
 
 const getReasonableProduct = (products) => {
   var reasonableProduct = [];
-  for(var i in products){
-    if(products[i]['price'] <= 50){
-      reasonableProduct.push(products[i]);
+  for(var i in products.result){
+    console.log(products.result[i]['price'])
+    if(products.result[i]['price'] <= 50){
+      reasonableProduct.push(products.result[i]);
     }
   }
-  return reasonableProduct
+  products.result = reasonableProduct
+
+  return products
 }
-
-const fetchReasonableProducts = async (page = 1, size = 12) => {
-  try {
-    const response = await fetch(
-      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
-    );
-    const body = await response.json();
-
-    if (body.success !== true) {
-      console.error(body);
-      return {currentProducts, currentPagination};
-    }
-
-    //console.log(body.data)
-    body.data.result = getReasonableProduct(body.data.result)
-    return body.data;
-  } catch (error) {
-    console.error(error);
-    return {currentProducts, currentPagination};
-  }
-}; 
 
 const fetchProducts = async (page = 1, size = 12) => {
   try {
@@ -137,7 +79,6 @@ const fetchProducts = async (page = 1, size = 12) => {
       console.error(body);
       return {currentProducts, currentPagination};
     }
-
     return body.data;
   } catch (error) {
     console.error(error);
@@ -240,6 +181,10 @@ selectShow.addEventListener('change', event => {
 
     populateBrandSelector()
 
+    recentProduct.setAttribute("style", "color:black;");
+    reasonablePrice.setAttribute("style", "color:black;")
+    onlyReasonable = false;
+    onlyRecent = false;
 });
 
 selectPage.addEventListener('change', event => {
@@ -248,8 +193,12 @@ selectPage.addEventListener('change', event => {
   .then(setCurrentProducts)
   .then(() => render(currentProducts, currentPagination));
 
-  populateBrandSelector()
+  populateBrandSelector();
 
+  recentProduct.setAttribute("style", "color:black;");
+  reasonablePrice.setAttribute("style", "color:black;");
+  onlyReasonable = false;
+  onlyRecent = false;
 });
 
 selectBrand.addEventListener('change', event => {
@@ -259,51 +208,71 @@ selectBrand.addEventListener('change', event => {
     .then(() => render(currentProducts, currentPagination));
   }
   else{
-    fetchProductsByBrand(event.target.value, currentPagination.currentPage, currentPagination.pageSize)
+    fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+    .then((data) => {
+      data.result = groupArrayOfObjects(data, 'brand')[event.target.value];
+      return data;
+    })
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination));
   }
   
+  recentProduct.setAttribute("style", "color:black;");
+  reasonablePrice.setAttribute("style", "color:black;")
+  onlyReasonable = false;
+  onlyRecent = false;
 });
+
+const filter = (onlyRecent, onlyReasonable) => {
+  if(onlyRecent === true){
+    if(onlyReasonable === true){
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      .then((data) => {return getRecentProduct(data);})
+      .then((data) => {return getReasonableProduct(data);})
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+      reasonablePrice.setAttribute("style", "color:#33FF36;");
+
+    }
+    else{
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      .then((data) => {return getRecentProduct(data);})
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+      reasonablePrice.setAttribute("style", "color:black;")
+    }
+    recentProduct.setAttribute("style", "color:#33FF36;");
+  }
+  else{
+    if(onlyReasonable === true){
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      .then((data) => {return getReasonableProduct(data);})
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+      reasonablePrice.setAttribute("style", "color:#33FF36;");
+    }
+    else{
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+      reasonablePrice.setAttribute("style", "color:black;")
+    }
+    recentProduct.setAttribute("style", "color:black;");
+  }
+}
 
 // Améliorable en donnant la possibilité d'afficher les articles récents et raisonnable
 var onlyRecent = false;
 recentProduct.addEventListener('click', event => {
-  onlyRecent = !onlyRecent
-  if(onlyRecent === true){
-    fetchRecentProducts(currentPagination.currentPage, currentPagination.pageSize)
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
-
-    recentProduct.setAttribute("style", "color:#33FF36;")
-  }
-  else{
-    fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
-    recentProduct.setAttribute("style", "color:black;")
-  }
-
+  onlyRecent = !onlyRecent;
+  filter(onlyRecent, onlyReasonable);
 });
 
 // Améliorable en donnant la possibilité d'afficher les articles récents et raisonnable
 var onlyReasonable = false
 reasonablePrice.addEventListener('click', event => {
-  onlyReasonable = !onlyReasonable
-  if(onlyReasonable === true){
-    fetchReasonableProducts(currentPagination.currentPage, currentPagination.pageSize)
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
-
-    reasonablePrice.setAttribute("style", "color:#33FF36;")
-  }
-  else{
-    fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
-    reasonablePrice.setAttribute("style", "color:black;")
-  }
-
+  onlyReasonable = !onlyReasonable;
+  filter(onlyRecent, onlyReasonable);
 });
 
 selectSort.addEventListener('change', event => {
