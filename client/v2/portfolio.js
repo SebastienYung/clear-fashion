@@ -9,6 +9,8 @@ let currentPagination = {};
 const selectShow = document.querySelector('#show-select');
 const selectPage = document.querySelector('#page-select');
 const selectBrand = document.querySelector('#brand-select');
+const recentProduct = document.querySelector('#recent-product');
+const reasonablePrice = document.querySelector('#reasonable-price')
 const sectionProducts = document.querySelector('#products');
 const spanNbProducts = document.querySelector('#nbProducts');
 
@@ -36,7 +38,7 @@ const setCurrentProducts = ({result, meta}) => {
   }, {});
 };
 
-const fetchProductsbyBrand = async (brand ,page = 1, size = 12) => {
+const fetchProductsByBrand = async (brand ,page = 1, size = 12) => {
   try {
     const response = await fetch(
       `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
@@ -57,7 +59,21 @@ const fetchProductsbyBrand = async (brand ,page = 1, size = 12) => {
   }
 };  
 
-const fetchProducts = async (page = 1, size = 12) => {
+const getRecentProduct = (products) => {
+  var recentProduct = [];
+  var twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+  for(var i in products){
+    if(new Date(products[i]['released']) >= twoWeeksAgo){
+      recentProduct.push(products[i]);
+    }
+  }
+
+  return recentProduct
+}
+
+const fetchRecentProducts = async (page = 1, size = 12) => {
   try {
     const response = await fetch(
       `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
@@ -70,6 +86,28 @@ const fetchProducts = async (page = 1, size = 12) => {
     }
 
     //console.log(body.data)
+    body.data.result = getRecentProduct(body.data.result)
+    console.log(body.data.result)
+    return body.data;
+  } catch (error) {
+    console.error(error);
+    return {currentProducts, currentPagination};
+  }
+}; 
+
+const fetchProducts = async (page = 1, size = 12) => {
+  try {
+    const response = await fetch(
+      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
+    );
+    const body = await response.json();
+
+    if (body.success !== true) {
+      console.error(body);
+      return {currentProducts, currentPagination};
+    }
+
+    console.log(body.data)
     return body.data;
   } catch (error) {
     console.error(error);
@@ -192,11 +230,30 @@ selectBrand.addEventListener('change', event => {
     .then(() => render(currentProducts, currentPagination));
   }
   else{
-    fetchProductsbyBrand(event.target.value, currentPagination.currentPage, currentPagination.pageSize)
+    fetchProductsByBrand(event.target.value, currentPagination.currentPage, currentPagination.pageSize)
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination));
   }
   
+});
+
+var onlyRecent = false;
+recentProduct.addEventListener('click', event => {
+  onlyRecent = !onlyRecent
+  if(onlyRecent === true){
+    fetchRecentProducts(currentPagination.currentPage, currentPagination.pageSize)
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
+
+    recentProduct.setAttribute("style", "color:#33FF36;")
+  }
+  else{
+    fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
+    recentProduct.setAttribute("style", "color:black;")
+  }
+
 });
 
 
@@ -233,4 +290,3 @@ document.addEventListener('DOMContentLoaded', () =>
 );
 
 populateBrandSelector()
-
