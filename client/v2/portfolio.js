@@ -12,8 +12,13 @@ const selectBrand = document.querySelector('#brand-select');
 const recentProduct = document.querySelector('#recent-product');
 const reasonablePrice = document.querySelector('#reasonable-price')
 const selectSort = document.querySelector('#sort-select')
-const sectionProducts = document.querySelector('#products');
+const numberNewProducts = document.querySelector("#nbNewProducts")
 const spanNbProducts = document.querySelector('#nbProducts');
+const spanP50Value = document.querySelector('#p50Value')
+const spanP90Value = document.querySelector('#p90Value')
+const spanP95Value = document.querySelector('#p95Value')
+const spanLastReleasedDate = document.querySelector('#lastReleasedDate')
+const sectionProducts = document.querySelector('#products');
 
 /**
  * Set global value
@@ -31,8 +36,20 @@ const setCurrentProducts = ({result, meta}) => {
  * @param  {Number}  [size=12] - size of the page
  * @return {Object}
  */
+function getNumberOfNewProduct(products) {
+  var countNewProduct = 0
+  var twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+  for(var i in products){
+    if(new Date(products[i]['released']) >= twoWeeksAgo){
+      countNewProduct++;
+    }
+  }
 
- function groupArrayOfObjects(list, key) {
+  return countNewProduct;
+}
+
+function groupArrayOfObjects(list, key) {
   return (list.result).reduce(function(rv, x) {
     (rv[x[key]] = rv[x[key]] || []).push(x);
     return rv;
@@ -58,7 +75,6 @@ const getRecentProduct = (products) => {
 const getReasonableProduct = (products) => {
   var reasonableProduct = [];
   for(var i in products.result){
-    console.log(products.result[i]['price'])
     if(products.result[i]['price'] <= 50){
       reasonableProduct.push(products.result[i]);
     }
@@ -79,6 +95,7 @@ const fetchProducts = async (page = 1, size = 12) => {
       console.error(body);
       return {currentProducts, currentPagination};
     }
+    //console.log(getRecentProduct(body.da ta).length);
     return body.data;
   } catch (error) {
     console.error(error);
@@ -150,16 +167,34 @@ const renderBrand = pagination => {
  * Render page selector
  * @param  {Object} pagination
  */
-const renderIndicators = pagination => {
+
+ function getP(products, value) {
+  products.sort((a, b) => (a.price > b.price) ? 1 : -1);
+  return products[Math.trunc(products.length*(value/100))].price
+}
+
+function getLastReleasedDate(products) {
+  products.sort((a, b) => (a.released > b.released) ? -1 : 1);
+  return products[0].released
+}
+
+const renderIndicators = (products, pagination) => {
   const {count} = pagination;
 
   spanNbProducts.innerHTML = count;
+  numberNewProducts.innerHTML = getNumberOfNewProduct(products);
+  spanP50Value.innerHTML = getP(products, 50)
+  spanP90Value.innerHTML = getP(products, 90)
+  spanP95Value.innerHTML = getP(products, 95)
+  spanLastReleasedDate.innerHTML = getLastReleasedDate(products)
+
+
 };
 
 const render = (products, pagination) => {
   renderProducts(products);
   renderPagination(pagination);
-  renderIndicators(pagination);
+  renderIndicators(products,pagination);
 };
 
 /**
@@ -276,7 +311,6 @@ reasonablePrice.addEventListener('click', event => {
 });
 
 selectSort.addEventListener('change', event => {
-  console.log(event.target.value)
   switch(event.target.value){
     case 'price-asc':
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
@@ -295,7 +329,6 @@ selectSort.addEventListener('change', event => {
     case 'date-desc':
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
       .then((data) => { data.result.sort((a, b) => (a.released > b.released) ? 1 : -1);
-                        console.log(data.result)
                         return data;})
       .then(setCurrentProducts)
       .then(() => render(currentProducts, currentPagination));
@@ -303,7 +336,6 @@ selectSort.addEventListener('change', event => {
     case 'date-asc':
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
       .then((data) => { data.result.sort((a, b) => (a.released > b.released) ? -1 : 1);
-                        console.log(data.result)
                         return data;})
       .then(setCurrentProducts)
       .then(() => render(currentProducts, currentPagination));

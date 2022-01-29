@@ -187,7 +187,7 @@ for(var obj in brands_sorted_by_price_asc){
 
 for(var obj in brands_sorted_by_price_asc){
   console.log(obj)
-  console.log(brands_sorted_by_price_asc[obj][Math.round(brands_sorted_by_price_asc[obj].length*0.9)-1])
+  console.log(brands_sorted_by_price_asc[obj][Math.trunc(brands_sorted_by_price_asc[obj].length*0.9)])
 }
 
 /**
