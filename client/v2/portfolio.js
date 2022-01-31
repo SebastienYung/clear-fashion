@@ -4,7 +4,7 @@
 // current products on the page
 let currentProducts = [];
 let currentPagination = {};
-
+let favoriteProducts = [];
 // inititiqte selectors
 const selectShow = document.querySelector('#show-select');
 const selectPage = document.querySelector('#page-select');
@@ -96,6 +96,7 @@ const fetchProducts = async (page = 1, size = 12) => {
       return {currentProducts, currentPagination};
     }
     //console.log(getRecentProduct(body.da ta).length);
+    console.log(body.data.result)
     return body.data;
   } catch (error) {
     console.error(error);
