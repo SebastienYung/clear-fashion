@@ -5,7 +5,8 @@
 let currentProducts = [];
 let currentPagination = {};
 let favoriteProducts = [];
-// inititiqte selectors
+
+// instantiate the selectors
 const selectShow = document.querySelector('#show-select');
 const selectPage = document.querySelector('#page-select');
 const selectBrand = document.querySelector('#brand-select');
@@ -204,10 +205,7 @@ const render = (products, pagination) => {
 
 /**
  * Select the number of products to display
- * @type {[type]}
  */
-
-
 
 selectShow.addEventListener('change', event => {
   currentPagination.pageSize = parseInt(event.target.value);
