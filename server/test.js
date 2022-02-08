@@ -35,6 +35,7 @@ if(string.includes("dedicatedbrand")){
             })
 
             console.log(listProduct)
+            console.log(listProduct.length)
 
         }
     });
@@ -91,18 +92,14 @@ else {
                         title = title.substring(0, title.length/2)
 
                         const price = parseFloat($(el)
-                            .find('.content_price')
-                            .find('span')
-                            .text()
-                            .replace(/\s\s+/g, '')
-                            .replace(/ €/g, '')
-                            .replace(/,/, '.'));
+                            .find('.prixright')
+                            .text().trim())
 
-                            const link = $(el)
-                            .find('.product_img_link')
-                            .attr('href')
+                        const link = $(el)
+                        .find('.product_img_link')
+                        .attr('href')
 
-                            listProduct.push({title, price, link})
+                        listProduct.push({title, price, link})
                     })
         
                     console.log(listProduct)

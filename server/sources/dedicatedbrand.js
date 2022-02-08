@@ -1,30 +1,37 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
+const e = require('cors');
 
 /**
  * Parse webpage e-shop
  * @param  {String} data - html response
  * @return {Array} products
  */
-const parse = data => {
-  const $ = cheerio.load(data);
+const parse = async data => {
+  
+  productList = []
 
-  return $('.productList-container .productList')
-    .map((i, element) => {
-      const name = $(element)
-        .find('.productList-title')
-        .text()
-        .trim()
-        .replace(/\s/g, ' ');
-      const price = parseInt(
-        $(element)
-          .find('.productList-price')
-          .text()
-      );
-
-      return {name, price};
-    })
-    .get();
+  var filtered = data.products.filter(function(x) {
+    return x !== undefined;
+  });
+  
+  filtered.forEach(el => {
+    if(el != undefined){
+      var name = el.name;
+      if(el.price != undefined){
+        var price = el.price.priceAsNumber
+      }
+      var link = "https://www.dedicatedbrand.com/" + el.canonicalUri
+      productList.push({name, price, link})
+    }
+  });
+  cleanedList = []
+  productList.forEach(el => {
+    if(el.name !== undefined && el.price!==undefined && el.link!==undefined){
+      cleanedList.push(el)
+    }
+  })
+  return cleanedList
 };
 
 /**
@@ -34,10 +41,11 @@ const parse = data => {
  */
 module.exports.scrape = async url => {
   try {
-    const response = await fetch(url);
-
+    const response = await fetch(
+      `https://www.dedicatedbrand.com/en/loadfilter?category=men%2Fall-men`
+    );
     if (response.ok) {
-      const body = await response.text();
+      const body = await response.json();
 
       return parse(body);
     }
