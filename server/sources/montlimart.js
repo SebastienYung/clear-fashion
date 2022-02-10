@@ -49,20 +49,21 @@ const parse = async data => {
  */
 
 module.exports.scrape = async url => {
-  try {
-    const response = await fetch(url);
+    var body;
+    var data = [];
+    try {
+        for(var i = 1; i < 9; i++){
+            var response = await fetch(`https://www.montlimart.com/toute-la-collection.html?page=${i}`);
 
-    if (response.ok) {
-      const body = await response.text();
+            if (response.ok) {
+                body = await response.text();
+                data = data.concat(await parse(body))
+            }
+        }
 
-      return parse(body);
+        return data;
+    } catch (error) {
+        console.error(error);
+        return null;
     }
-
-    console.error(response);
-
-    return null;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
 };

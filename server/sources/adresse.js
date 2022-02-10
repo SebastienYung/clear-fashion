@@ -49,7 +49,7 @@ const parse = async data => {
 
 module.exports.scrape = async url => {
   try {
-    const response = await fetch(url);
+    const response = await fetch('https://adresse.paris/630-toute-la-collection?n=116');
 
     if (response.ok) {
       const body = await response.text();

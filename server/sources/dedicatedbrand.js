@@ -42,7 +42,7 @@ const parse = async data => {
 module.exports.scrape = async url => {
   try {
     const response = await fetch(
-      `https://www.dedicatedbrand.com/en/loadfilter?category=men%2Fall-men`
+      `https://www.dedicatedbrand.com/en/loadfilter`
     );
     if (response.ok) {
       const body = await response.json();
