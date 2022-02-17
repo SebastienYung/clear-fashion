@@ -60,20 +60,25 @@ function groupArrayOfObjects(list, key) {
 const getRecentProduct = (products) => {
   var recentProduct = [];
   var twoWeeksAgo = new Date();
-  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+  
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 31);
 
   for(var i in products.result){
+
     if(new Date(products.result[i]['released']) >= twoWeeksAgo){
       recentProduct.push(products.result[i]);
     }
-  }
-  
-  products.result = recentProduct
 
+  }
+
+
+  products.result = recentProduct
   return products
 }
 
 const getReasonableProduct = (products) => {
+  console.log(products)
+
   var reasonableProduct = [];
   for(var i in products.result){
     if(products.result[i]['price'] <= 50){
@@ -97,7 +102,6 @@ const fetchProducts = async (page = 1, size = 12) => {
       return {currentProducts, currentPagination};
     }
     //console.log(getRecentProduct(body.da ta).length);
-    console.log(body.data.result)
     return body.data;
   } catch (error) {
     console.error(error);
@@ -260,6 +264,7 @@ selectBrand.addEventListener('change', event => {
 const filter = (onlyRecent, onlyReasonable) => {
   if(onlyRecent === true){
     if(onlyReasonable === true){
+      console.log(1)
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
       .then((data) => {return getRecentProduct(data);})
       .then((data) => {return getReasonableProduct(data);})
@@ -269,6 +274,7 @@ const filter = (onlyRecent, onlyReasonable) => {
 
     }
     else{
+      console.log(2)
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
       .then((data) => {return getRecentProduct(data);})
       .then(setCurrentProducts)
@@ -279,6 +285,7 @@ const filter = (onlyRecent, onlyReasonable) => {
   }
   else{
     if(onlyReasonable === true){
+      console.log(3)
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
       .then((data) => {return getReasonableProduct(data);})
       .then(setCurrentProducts)
@@ -286,6 +293,8 @@ const filter = (onlyRecent, onlyReasonable) => {
       reasonablePrice.setAttribute("style", "color:#33FF36;");
     }
     else{
+      console.log(4)
+
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
       .then(setCurrentProducts)
       .then(() => render(currentProducts, currentPagination));
