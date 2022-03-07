@@ -26,7 +26,7 @@ const sectionProducts = document.querySelector('#products');
  * @param {Array} result - products to display
  * @param {Object} meta - pagination meta info
  */
-const setCurrentProducts = ({result, meta}) => {
+const setCurrentProducts = ({ result, meta }) => {
   currentProducts = result;
   currentPagination = meta;
 };
@@ -37,12 +37,14 @@ const setCurrentProducts = ({result, meta}) => {
  * @param  {Number}  [size=12] - size of the page
  * @return {Object}
  */
+
+
 function getNumberOfNewProduct(products) {
   var countNewProduct = 0
   var twoWeeksAgo = new Date();
-  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-  for(var i in products){
-    if(new Date(products[i]['released']) >= twoWeeksAgo){
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 31);
+  for (var i in products) {
+    if (new Date(products[i]['released']) >= twoWeeksAgo) {
       countNewProduct++;
     }
   }
@@ -51,7 +53,7 @@ function getNumberOfNewProduct(products) {
 }
 
 function groupArrayOfObjects(list, key) {
-  return (list.result).reduce(function(rv, x) {
+  return (list.result).reduce(function (rv, x) {
     (rv[x[key]] = rv[x[key]] || []).push(x);
     return rv;
   }, {});
@@ -60,12 +62,12 @@ function groupArrayOfObjects(list, key) {
 const getRecentProduct = (products) => {
   var recentProduct = [];
   var twoWeeksAgo = new Date();
-  
-  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 31);
 
-  for(var i in products.result){
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 31); // sortie le dernier mois  
 
-    if(new Date(products.result[i]['released']) >= twoWeeksAgo){
+  for (var i in products.result) {
+
+    if (new Date(products.result[i]['released']) >= twoWeeksAgo) {
       recentProduct.push(products.result[i]);
     }
 
@@ -77,11 +79,10 @@ const getRecentProduct = (products) => {
 }
 
 const getReasonableProduct = (products) => {
-  console.log(products)
 
   var reasonableProduct = [];
-  for(var i in products.result){
-    if(products.result[i]['price'] <= 50){
+  for (var i in products.result) {
+    if (products.result[i]['price'] <= 50) {
       reasonableProduct.push(products.result[i]);
     }
   }
@@ -99,15 +100,15 @@ const fetchProducts = async (page = 1, size = 12) => {
 
     if (body.success !== true) {
       console.error(body);
-      return {currentProducts, currentPagination};
+      return { currentProducts, currentPagination };
     }
     //console.log(getRecentProduct(body.da ta).length);
     return body.data;
   } catch (error) {
     console.error(error);
-    return {currentProducts, currentPagination};
+    return { currentProducts, currentPagination };
   }
-};  
+};
 
 
 /**
@@ -120,12 +121,12 @@ const renderProducts = products => {
   const template = products
     .map(product => {
       return `
-      <div class="product" id="${product.uuid}">
-        <span>${product.brand}</span>
-        <a href="${product.link}" target="_blank">${product.name}</a>
-        <span>${product.price}</span>
-      </div>
-    `;
+<div class="product" id="${product.uuid}">
+<span>${product.brand}</span>
+<a href="${product.link}" target="_blank">${product.name}</a>
+<span>${product.price}</span>
+</div>
+`;
     })
     .join('');
 
@@ -148,9 +149,9 @@ const renderProducts = products => {
  * @param  {Object} pagination
  */
 const renderPagination = pagination => {
-  const {currentPage, pageCount} = pagination;
+  const { currentPage, pageCount } = pagination;
   const options = Array.from(
-    {'length': pageCount},
+    { 'length': pageCount },
     (value, index) => `<option value="${index + 1}">${index + 1}</option>`
   ).join('');
 
@@ -159,9 +160,9 @@ const renderPagination = pagination => {
 };
 
 const renderBrand = pagination => {
-  const {currentPage, pageCount} = pagination;
+  const { currentPage, pageCount } = pagination;
   const options = Array.from(
-    {'length': pageCount},
+    { 'length': pageCount },
     (value, index) => `<option value="${index + 1}">${index + 1}</option>`
   ).join('');
 
@@ -174,9 +175,9 @@ const renderBrand = pagination => {
  * @param  {Object} pagination
  */
 
- function getP(products, value) {
+function getP(products, value) {
   products.sort((a, b) => (a.price > b.price) ? 1 : -1);
-  return products[Math.trunc(products.length*(value/100))].price
+  return products[Math.trunc(products.length * (value / 100))].price
 }
 
 function getLastReleasedDate(products) {
@@ -185,7 +186,7 @@ function getLastReleasedDate(products) {
 }
 
 const renderIndicators = (products, pagination) => {
-  const {count} = pagination;
+  const { count } = pagination;
 
   spanNbProducts.innerHTML = count;
   numberNewProducts.innerHTML = getNumberOfNewProduct(products);
@@ -200,7 +201,7 @@ const renderIndicators = (products, pagination) => {
 const render = (products, pagination) => {
   renderProducts(products);
   renderPagination(pagination);
-  renderIndicators(products,pagination);
+  renderIndicators(products, pagination);
 };
 
 /**
@@ -217,19 +218,19 @@ selectShow.addEventListener('change', event => {
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination));
 
-    populateBrandSelector()
+  populateBrandSelector()
 
-    recentProduct.setAttribute("style", "color:black;");
-    reasonablePrice.setAttribute("style", "color:black;")
-    onlyReasonable = false;
-    onlyRecent = false;
+  recentProduct.setAttribute("style", "color:black;");
+  reasonablePrice.setAttribute("style", "color:black;")
+  onlyReasonable = false;
+  onlyRecent = false;
 });
 
 selectPage.addEventListener('change', event => {
   currentPagination.currentPage = parseInt(event.target.value);
   fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-  .then(setCurrentProducts)
-  .then(() => render(currentProducts, currentPagination));
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
 
   populateBrandSelector();
 
@@ -240,21 +241,21 @@ selectPage.addEventListener('change', event => {
 });
 
 selectBrand.addEventListener('change', event => {
-  if(event.target.value === 'All'){
+  if (event.target.value === 'All') {
     fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
   }
-  else{
+  else {
     fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-    .then((data) => {
-      data.result = groupArrayOfObjects(data, 'brand')[event.target.value];
-      return data;
-    })
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
+      .then((data) => {
+        data.result = groupArrayOfObjects(data, 'brand')[event.target.value];
+        return data;
+      })
+      .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
   }
-  
+
   recentProduct.setAttribute("style", "color:black;");
   reasonablePrice.setAttribute("style", "color:black;")
   onlyReasonable = false;
@@ -262,45 +263,35 @@ selectBrand.addEventListener('change', event => {
 });
 
 const filter = (onlyRecent, onlyReasonable) => {
-  if(onlyRecent === true){
-    if(onlyReasonable === true){
-      console.log(1)
+  if (onlyRecent === true) {
+    if (onlyReasonable === true) {
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then((data) => {return getRecentProduct(data);})
-      .then((data) => {return getReasonableProduct(data);})
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
-      reasonablePrice.setAttribute("style", "color:#33FF36;");
+        .then((data) => { return getRecentProduct(data); })
+        .then((data) => { return getReasonableProduct(data); })
+        .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
 
     }
-    else{
-      console.log(2)
+    else {
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then((data) => {return getRecentProduct(data);})
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
-      reasonablePrice.setAttribute("style", "color:black;")
+        .then((data) => { return getRecentProduct(data); })
+        .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
     }
-    recentProduct.setAttribute("style", "color:#33FF36;");
   }
-  else{
-    if(onlyReasonable === true){
-      console.log(3)
+  else {
+    if (onlyReasonable === true) {
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then((data) => {return getReasonableProduct(data);})
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
-      reasonablePrice.setAttribute("style", "color:#33FF36;");
+        .then((data) => { return getReasonableProduct(data); })
+        .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
     }
-    else{
-      console.log(4)
+    else {
 
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
-      reasonablePrice.setAttribute("style", "color:black;")
+        .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
     }
-    recentProduct.setAttribute("style", "color:black;");
   }
 }
 
@@ -319,54 +310,62 @@ reasonablePrice.addEventListener('click', event => {
 });
 
 selectSort.addEventListener('change', event => {
-  switch(event.target.value){
+  switch (event.target.value) {
     case 'price-asc':
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then((data) => { data.result.sort((a, b) => (a.price > b.price) ? 1 : -1);
-                        return data;})
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
+        .then((data) => {
+          data.result.sort((a, b) => (a.price > b.price) ? 1 : -1);
+          return data;
+        })
+        .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
       break;
     case 'price-desc':
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then((data) => { data.result.sort((a, b) => (a.price > b.price) ? -1 : 1);
-                        return data;})
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
+        .then((data) => {
+          data.result.sort((a, b) => (a.price > b.price) ? -1 : 1);
+          return data;
+        })
+        .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
       break;
     case 'date-desc':
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then((data) => { data.result.sort((a, b) => (a.released > b.released) ? 1 : -1);
-                        return data;})
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
+        .then((data) => {
+          data.result.sort((a, b) => (a.released > b.released) ? 1 : -1);
+          return data;
+        })
+        .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
       break;
     case 'date-asc':
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then((data) => { data.result.sort((a, b) => (a.released > b.released) ? -1 : 1);
-                        return data;})
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
+        .then((data) => {
+          data.result.sort((a, b) => (a.released > b.released) ? -1 : 1);
+          return data;
+        })
+        .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
       break;
     default:
       fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
+        .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
       break;
   }
 });
 
 
-const populateBrandSelector = async() => {
+const populateBrandSelector = async () => {
   selectBrand.innerHTML = "";
 
   //brands = fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(getUniqueBrands);
   var uniqueBrand = await getUniqueBrands()
   var newOption = document.createElement("option")
-    newOption.value = "All"
-    newOption.innerHTML = "All"
-    selectBrand.options.add(newOption)
-  for(var brand in uniqueBrand){
+  newOption.value = "All"
+  newOption.innerHTML = "All"
+  selectBrand.options.add(newOption)
+  for (var brand in uniqueBrand) {
     var newOption = document.createElement("option")
     newOption.value = uniqueBrand[brand]
     newOption.innerHTML = uniqueBrand[brand]
@@ -389,3 +388,7 @@ document.addEventListener('DOMContentLoaded', () =>
 );
 
 populateBrandSelector()
+
+
+
+
