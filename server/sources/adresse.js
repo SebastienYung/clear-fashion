@@ -20,6 +20,7 @@ const parse = async data => {
             .replace(/\t+/g, '')
             .replace(/\n/g, '')
         
+        var brand = 'adresse'
         title = title.substring(0, title.length/2)
 
         const price = parseFloat($(el)
@@ -30,7 +31,7 @@ const parse = async data => {
         .find('.product_img_link')
         .attr('href')
 
-        listProduct.push({title, price, link})
+        listProduct.push({title, brand, price, link})
     })
 
     listProduct.forEach(el => {

@@ -20,6 +20,7 @@ const parse = async data => {
             .text()
             .replace(/\s\s+/g, '');
         
+        var brand = "montlimart"
         const price = parseFloat($(el)
         .find('.price')
         .text()
@@ -31,7 +32,7 @@ const parse = async data => {
             .find('a')
             .attr('href')
         
-        listProduct.push({title, price, link});
+        listProduct.push({title, brand, price, link});
     })
 
     listProduct.forEach(el => {

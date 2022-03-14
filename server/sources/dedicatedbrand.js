@@ -18,11 +18,12 @@ const parse = async data => {
   filtered.forEach(el => {
     if(el != undefined){
       var name = el.name;
+      var brand = "dedicatedbrand"
       if(el.price != undefined){
         var price = el.price.priceAsNumber
       }
       var link = "https://www.dedicatedbrand.com/" + el.canonicalUri
-      productList.push({name, price, link})
+      productList.push({name, brand, price, link})
     }
   });
   cleanedList = []
