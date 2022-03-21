@@ -47,7 +47,6 @@ app.get('/products', async (request, response) => {
 
   }else{
     searchCursor = await products.find()
-
   }
   let result = []
   while (await searchCursor.hasNext()){
