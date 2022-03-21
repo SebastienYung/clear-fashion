@@ -91,10 +91,10 @@ const getReasonableProduct = (products) => {
   return products
 }
 
-const fetchProducts = async (page = 1, size = 12) => {
+const fetchProducts = async (page = 1, size = 12, brand=null, maxPrice = null) => {
   try {
     const response = await fetch(
-      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
+      `https://clear-fashion-lilac.vercel.app/products?brand=${brand}&maxPrice=${maxPrice}&page=${page}&size=${size}`
     );
     const body = await response.json();
 
