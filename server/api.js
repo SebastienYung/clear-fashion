@@ -33,16 +33,16 @@ app.get('/products', async (request, response) => {
 
   let searchCursor
 
-  if('brand' in request.query && 'maxPrice' in request.query){
+  if('brand' in request.query && 'maxPrice' in request.query && request.query['maxPrice'] !== null && request.query['brand'] !== null){
     searchCursor = await products.find({
       'brand':request.query['brand'],
       'price':{$lte:parseInt(request.query['maxPrice'])}
     })
 
-  }else if('brand' in request.query && !('maxPrice' in request.query)){
+  }else if('brand' in request.query && !('maxPrice' in request.query) && request.query['brand'] !== null){
     searchCursor = await products.find({'brand':request.query['brand']})
 
-  }else if(!('brand' in request.query) && 'maxPrice' in request.query){
+  }else if(!('brand' in request.query) && 'maxPrice' in request.query && request.query['maxPrice'] !== null){
     searchCursor = await products.find({'price':{$lte:parseInt(request.query['maxPrice'])}})
 
   }else{
