@@ -35,7 +35,9 @@ const setCurrentProducts = ({ result, meta }) => {
  * Fetch products from api
  * @param  {Number}  [page=1] - current page to fetch
  * @param  {Number}  [size=12] - size of the page
- * @return {Object}
+ * @param  {String}  [brand=null] - brand filter
+ * @param  {Number}  [maxPrice=null] - brand filter
+* @return {Object}
  */
 
 
@@ -91,7 +93,7 @@ const getReasonableProduct = (products) => {
   return products
 }
 
-const fetchProducts = async (page = 1, size = 12, brand=null, maxPrice = null) => {
+const fetchProducts = async (page = 1, size = 12, brand='All', maxPrice = 0) => {
   try {
     const response = await fetch(
       `https://clear-fashion-lilac.vercel.app/products?brand=${brand}&maxPrice=${maxPrice}&page=${page}&size=${size}`
@@ -220,8 +222,6 @@ selectShow.addEventListener('change', event => {
 
   populateBrandSelector()
 
-  recentProduct.setAttribute("style", "color:black;");
-  reasonablePrice.setAttribute("style", "color:black;")
   onlyReasonable = false;
   onlyRecent = false;
 });
@@ -234,30 +234,14 @@ selectPage.addEventListener('change', event => {
 
   populateBrandSelector();
 
-  recentProduct.setAttribute("style", "color:black;");
-  reasonablePrice.setAttribute("style", "color:black;");
   onlyReasonable = false;
   onlyRecent = false;
 });
 
 selectBrand.addEventListener('change', event => {
-  if (event.target.value === 'All') {
-    fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
-  }
-  else {
-    fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-      .then((data) => {
-        data.result = groupArrayOfObjects(data, 'brand')[event.target.value];
-        return data;
-      })
-      .then(setCurrentProducts)
-      .then(() => render(currentProducts, currentPagination));
-  }
-
-  recentProduct.setAttribute("style", "color:black;");
-  reasonablePrice.setAttribute("style", "color:black;")
+  fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
   onlyReasonable = false;
   onlyRecent = false;
 });
@@ -355,40 +339,11 @@ selectSort.addEventListener('change', event => {
   }
 });
 
-
-const populateBrandSelector = async () => {
-  selectBrand.innerHTML = "";
-
-  //brands = fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(getUniqueBrands);
-  var uniqueBrand = await getUniqueBrands()
-  var newOption = document.createElement("option")
-  newOption.value = "All"
-  newOption.innerHTML = "All"
-  selectBrand.options.add(newOption)
-  for (var brand in uniqueBrand) {
-    var newOption = document.createElement("option")
-    newOption.value = uniqueBrand[brand]
-    newOption.innerHTML = uniqueBrand[brand]
-    selectBrand.options.add(newOption)
-  }
-}
-
-const getUniqueBrands = async () => {
-  var data = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-  //console.log([... new Set(data.result.map(obj => obj.brand))])
-  return await [... new Set(data.result.map(obj => obj.brand))];
-};
-
-fetchProducts(currentPagination.currentPage, currentPagination.pageSize).then(getUniqueBrands)
-
 document.addEventListener('DOMContentLoaded', () =>
   fetchProducts()
     .then(setCurrentProducts)
     .then(() => render(currentProducts, currentPagination))
 );
 
-populateBrandSelector()
-
-
-
+fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
 
