@@ -32,13 +32,23 @@ app.get('/products', async (request, response) => {
   const products = data.collection('products')
 
   let searchCursor
-  if('brand' in request.query){
-    searchCursor = await products.find({'brand':request.query['brand']})
-  }
-  else{
-    searchCursor = await products.find()
-  }
 
+  if('brand' in request.query && 'maxPrice' in request.query){
+    searchCursor = await products.find({
+      'brand':request.query['brand'],
+      'price':{$lte:parseInt(request.query['maxPrice'])}
+    })
+
+  }else if('brand' in request.query && !('maxPrice' in request.query)){
+    searchCursor = await products.find({'brand':request.query['brand']})
+
+  }else if(!('brand' in request.query) && 'maxPrice' in request.query){
+    searchCursor = await products.find({'price':{$lte:parseInt(request.query['maxPrice'])}})
+
+  }else{
+    searchCursor = await products.find()
+
+  }
   let result = []
   while (await searchCursor.hasNext()){
     result.push(await searchCursor.next())
@@ -68,7 +78,7 @@ app.get('/products', async (request, response) => {
     for(var i = indexFirstProduct; i<indexFirstProduct+size; i++){
       myPage.push(result[i])
     }
-    console.log(myPage)
+    result = myPage
 
   }
 
