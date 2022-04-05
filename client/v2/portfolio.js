@@ -26,17 +26,16 @@ const sectionProducts = document.querySelector('#products');
  * @param {Array} result - products to display
  * @param {Object} meta - pagination meta info
  */
-const setCurrentProducts = ({ result, meta }) => {
+const setCurrentProducts = ( result ) => {
   currentProducts = result;
-  currentPagination = meta;
 };
 
 /**
  * Fetch products from api
  * @param  {Number}  [page=1] - current page to fetch
  * @param  {Number}  [size=12] - size of the page
- * @param  {String}  [brand=null] - brand filter
- * @param  {Number}  [maxPrice=null] - brand filter
+ * @param  {String}  [brand='All'] - brand filter
+ * @param  {Number}  [maxPrice=0] - brand filter
 * @return {Object}
  */
 
@@ -55,7 +54,7 @@ function getNumberOfNewProduct(products) {
 }
 
 function groupArrayOfObjects(list, key) {
-  return (list.result).reduce(function (rv, x) {
+  return (list).reduce(function (rv, x) {
     (rv[x[key]] = rv[x[key]] || []).push(x);
     return rv;
   }, {});
@@ -67,45 +66,49 @@ const getRecentProduct = (products) => {
 
   twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 31); // sortie le dernier mois  
 
-  for (var i in products.result) {
+  for (var i in products) {
 
-    if (new Date(products.result[i]['released']) >= twoWeeksAgo) {
-      recentProduct.push(products.result[i]);
+    if (new Date(products[i]['released']) >= twoWeeksAgo) {
+      recentProduct.push(products[i]);
     }
 
   }
 
 
-  products.result = recentProduct
+  products = recentProduct
   return products
 }
 
 const getReasonableProduct = (products) => {
 
   var reasonableProduct = [];
-  for (var i in products.result) {
-    if (products.result[i]['price'] <= 50) {
-      reasonableProduct.push(products.result[i]);
+  for (var i in products) {
+    if (products[i]['price'] <= 50) {
+      reasonableProduct.push(products[i]);
     }
   }
-  products.result = reasonableProduct
+  products = reasonableProduct
 
   return products
 }
 
 const fetchProducts = async (page = 1, size = 12, brand='All', maxPrice = 0) => {
   try {
+    //console.log(page)
+    //console.log(size)
+    //console.log(brand)
+    //console.log(maxPrice)
+
     const response = await fetch(
       `https://clear-fashion-lilac.vercel.app/products?brand=${brand}&maxPrice=${maxPrice}&page=${page}&size=${size}`
     );
     const body = await response.json();
-
-    if (body.success !== true) {
-      console.error(body);
-      return { currentProducts, currentPagination };
-    }
-    //console.log(getRecentProduct(body.da ta).length);
-    return body.data;
+    currentPagination.pageSize = size
+    currentPagination.currentPage = page
+    currentPagination.brand = brand
+    currentPagination.maxPrice = maxPrice
+    //console.log(getRecentProduct(body.data).length);
+    return body;
   } catch (error) {
     console.error(error);
     return { currentProducts, currentPagination };
@@ -123,9 +126,9 @@ const renderProducts = products => {
   const template = products
     .map(product => {
       return `
-<div class="product" id="${product.uuid}">
+<div class="product" id="${product._id}">
 <span>${product.brand}</span>
-<a href="${product.link}" target="_blank">${product.name}</a>
+<a href="${product.link}" target="_blank">${product.title}</a>
 <span>${product.price}</span>
 </div>
 `;
@@ -141,7 +144,7 @@ const renderProducts = products => {
 // 1. Render option
 // renderBrands()
 // map -> brands
-// <option value="${brand.uuid}">${brand.name}</option>
+// <option value="${brand._id}">${brand.name}</option>
 // selectBrand.appendChild ^
 
 // 2. document.querySelector('#my-button').addEventListener('click')
@@ -150,12 +153,19 @@ const renderProducts = products => {
  * Render page selector
  * @param  {Object} pagination
  */
-const renderPagination = pagination => {
-  const { currentPage, pageCount } = pagination;
-  const options = Array.from(
-    { 'length': pageCount },
-    (value, index) => `<option value="${index + 1}">${index + 1}</option>`
-  ).join('');
+const renderPagination = async (pagination) => {
+  const response = await fetch(
+    `https://clear-fashion-lilac.vercel.app/count`
+  );
+  const body = await response.json();
+  const pageCount = pagination.pageSize
+  const currentPage = pagination.currentPage
+  console.log(parseInt(body[0]/pageCount)+1)
+  let options = ""
+
+  for(var i = 0; i < parseInt(body[0]/pageCount); i++){
+    options = options.concat('', `<option value="${i+1}">${i+1}</option>`)
+  }
 
   selectPage.innerHTML = options;
   selectPage.selectedIndex = currentPage - 1;
@@ -216,40 +226,28 @@ const render = (products, pagination) => {
 
 selectShow.addEventListener('change', event => {
   currentPagination.pageSize = parseInt(event.target.value);
-  fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
+  filter(onlyRecent, onlyReasonable);
 
-  populateBrandSelector()
 
-  onlyReasonable = false;
-  onlyRecent = false;
+
 });
 
 selectPage.addEventListener('change', event => {
   currentPagination.currentPage = parseInt(event.target.value);
-  fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
+  filter(onlyRecent, onlyReasonable);
 
-  populateBrandSelector();
-
-  onlyReasonable = false;
-  onlyRecent = false;
 });
 
-selectBrand.addEventListener('change', event => {
-  fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination));
-  onlyReasonable = false;
-  onlyRecent = false;
+selectBrand.addEventListener('change', async (event) => {
+  currentPagination.brand = String(event.target.value)
+  filter(onlyRecent, onlyReasonable);
+
 });
 
 const filter = (onlyRecent, onlyReasonable) => {
   if (onlyRecent === true) {
     if (onlyReasonable === true) {
-      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize, currentPagination.brand)
         .then((data) => { return getRecentProduct(data); })
         .then((data) => { return getReasonableProduct(data); })
         .then(setCurrentProducts)
@@ -257,7 +255,7 @@ const filter = (onlyRecent, onlyReasonable) => {
 
     }
     else {
-      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize, currentPagination.brand)
         .then((data) => { return getRecentProduct(data); })
         .then(setCurrentProducts)
         .then(() => render(currentProducts, currentPagination));
@@ -265,14 +263,14 @@ const filter = (onlyRecent, onlyReasonable) => {
   }
   else {
     if (onlyReasonable === true) {
-      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize, currentPagination.brand)
         .then((data) => { return getReasonableProduct(data); })
         .then(setCurrentProducts)
         .then(() => render(currentProducts, currentPagination));
     }
     else {
 
-      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize, currentPagination.brand)
         .then(setCurrentProducts)
         .then(() => render(currentProducts, currentPagination));
     }
@@ -284,6 +282,7 @@ var onlyRecent = false;
 recentProduct.addEventListener('click', event => {
   onlyRecent = !onlyRecent;
   filter(onlyRecent, onlyReasonable);
+
 });
 
 // Améliorable en donnant la possibilité d'afficher les articles récents et raisonnable
@@ -296,54 +295,52 @@ reasonablePrice.addEventListener('click', event => {
 selectSort.addEventListener('change', event => {
   switch (event.target.value) {
     case 'price-asc':
-      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize, currentPagination.brand)
         .then((data) => {
-          data.result.sort((a, b) => (a.price > b.price) ? 1 : -1);
+          data.sort((a, b) => (a.price > b.price) ? 1 : -1);
           return data;
         })
         .then(setCurrentProducts)
         .then(() => render(currentProducts, currentPagination));
       break;
     case 'price-desc':
-      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize, currentPagination.brand)
         .then((data) => {
-          data.result.sort((a, b) => (a.price > b.price) ? -1 : 1);
+          data.sort((a, b) => (a.price > b.price) ? -1 : 1);
           return data;
         })
         .then(setCurrentProducts)
         .then(() => render(currentProducts, currentPagination));
       break;
     case 'date-desc':
-      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize, currentPagination.brand)
         .then((data) => {
-          data.result.sort((a, b) => (a.released > b.released) ? 1 : -1);
+          data.sort((a, b) => (a.released > b.released) ? 1 : -1);
           return data;
         })
         .then(setCurrentProducts)
         .then(() => render(currentProducts, currentPagination));
       break;
     case 'date-asc':
-      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize, currentPagination.brand)
         .then((data) => {
-          data.result.sort((a, b) => (a.released > b.released) ? -1 : 1);
+          data.sort((a, b) => (a.released > b.released) ? -1 : 1);
           return data;
         })
         .then(setCurrentProducts)
         .then(() => render(currentProducts, currentPagination));
       break;
     default:
-      fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+      fetchProducts(currentPagination.currentPage, currentPagination.pageSize, currentPagination.brand)
         .then(setCurrentProducts)
         .then(() => render(currentProducts, currentPagination));
       break;
   }
 });
 
-document.addEventListener('DOMContentLoaded', () =>
-  fetchProducts()
-    .then(setCurrentProducts)
-    .then(() => render(currentProducts, currentPagination))
-);
-
-fetchProducts(currentPagination.currentPage, currentPagination.pageSize)
+document.addEventListener('DOMContentLoaded', async () => {
+  const products = await fetchProducts();
+  await setCurrentProducts(products);
+  await render(currentProducts, currentPagination);
+});
 

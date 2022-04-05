@@ -17,18 +17,18 @@ const parse = async data => {
   
   filtered.forEach(el => {
     if(el != undefined){
-      var name = el.name;
+      var title = el.name;
       var brand = "dedicatedbrand"
       if(el.price != undefined){
         var price = el.price.priceAsNumber
       }
       var link = "https://www.dedicatedbrand.com/" + el.canonicalUri
-      productList.push({name, brand, price, link})
+      productList.push({title, brand, price, link})
     }
   });
   cleanedList = []
   productList.forEach(el => {
-    if(el.name !== undefined && el.price!==undefined && el.link!==undefined){
+    if(el.title !== undefined && el.price!==undefined && el.link!==undefined){
       cleanedList.push(el)
     }
   })

@@ -18,6 +18,8 @@ async function InsertAllProducts(collection) {
     products = products.concat(await adresse.scrape(''));
     products = products.concat(await montlimart.scrape(''));
 
+    products = products.sort((a, b) => 0.5 - Math.random());
+
     const result = await collection.insertMany(products);
     console.log(result);
 }

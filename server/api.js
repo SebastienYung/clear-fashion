@@ -24,6 +24,25 @@ app.get('/', (request, response) => {
   response.send({'ack' : True});
 });
 
+app.get('/count', async (request, response) => {
+  client = await MongoClient.connect(MONGODB_URI, { 'useNewUrlParser': true });
+  const data = await client.db(MONGODB_DB_NAME)
+  console.log(`Connected to database ${data.databaseName}`)
+
+  const products = data.collection('products')
+
+  let searchCursor
+
+  searchCursor = await products.countDocuments()
+
+  let result = []
+
+  result.push(searchCursor)
+
+  response.send(result)
+
+} )
+
 app.get('/products', async (request, response) => {
   client = await MongoClient.connect(MONGODB_URI, { 'useNewUrlParser': true });
   const data = await client.db(MONGODB_DB_NAME)
@@ -33,19 +52,20 @@ app.get('/products', async (request, response) => {
 
   let searchCursor
 
-  if('brand' in request.query && 'maxPrice' in request.query && request.query['maxPrice'] !== 0 && request.query['brand'] !== 'All'){
+  if('brand' in request.query && 'maxPrice' in request.query && parseInt(request.query['maxPrice']) !== 0 && request.query['brand'] !== 'All'){
     searchCursor = await products.find({
       'brand':request.query['brand'],
       'price':{$lte:parseInt(request.query['maxPrice'])}
     })
 
-  }else if('brand' in request.query && 'maxPrice' in request.query && request.query['brand'] !== 'All' && request.query['maxPrice'] === 0){
+  }else if('brand' in request.query && 'maxPrice' in request.query && request.query['brand'] !== 'All' && parseInt(request.query['maxPrice']) === 0){
     searchCursor = await products.find({'brand':request.query['brand']})
 
-  }else if('brand' in request.query && 'maxPrice' in request.query && request.query['maxPrice'] !== 0 && request.query['brand'] === 'All'){
+  }else if('brand' in request.query && 'maxPrice' in request.query && parseInt(request.query['maxPrice']) !== 0 && request.query['brand'] === 'All'){
     searchCursor = await products.find({'price':{$lte:parseInt(request.query['maxPrice'])}})
 
-  }else{
+  }
+  else{
     searchCursor = await products.find()
   }
   let result = []
