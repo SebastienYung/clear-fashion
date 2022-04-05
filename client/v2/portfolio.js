@@ -100,7 +100,7 @@ const fetchProducts = async (page = 1, size = 12, brand='All', maxPrice = 0) => 
     //console.log(maxPrice)
 
     const response = await fetch(
-      `https://clear-fashion-lilac.vercel.app/products?brand=${brand}&maxPrice=${maxPrice}&page=${page}&size=${size}`
+      `https://clear-fashion-server-mu.vercel.app/products?brand=${brand}&maxPrice=${maxPrice}&page=${page}&size=${size}`
     );
     const body = await response.json();
     currentPagination.pageSize = size
@@ -155,7 +155,7 @@ const renderProducts = products => {
  */
 const renderPagination = async (pagination) => {
   const response = await fetch(
-    `https://clear-fashion-lilac.vercel.app/count`
+    `https://clear-fashion-server-mu.vercel.app/count`
   );
   const body = await response.json();
   const pageCount = pagination.pageSize
